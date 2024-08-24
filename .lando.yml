@@ -1,0 +1,8 @@
+name: jatmus
+recipe: laravel
+config:
+  php: 8.2
+  webroot: public
+services:
+  phpmyadmin:
+    type: phpmyadmin

@@ -1,0 +1,15 @@
+<?php
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MainController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', [MainController::class, 'index'])->name('home');
+Route::post('/process', [MainController::class, 'process'])->name('process');
+
+Route::get('/feed', [MainController::class, 'feed'])->name('feed');
+Route::get('/result', [MainController::class, 'result'])->name('result');
+Route::get('/profile', [MainController::class, 'profile'])->name('profile');
+
+Route::post('/auth/check', [AuthController::class, 'checkAuth'])->name('auth.check');
+Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
