@@ -21,6 +21,7 @@ const effects = [
 
 const form = ref({
     song: null,
+    song_id: props?.song?.id,
     effect: "speed_up",
 });
 const processing = ref(false);
@@ -28,7 +29,11 @@ const processedSong = ref(null);
 
 function processAudio() {
     const formData = new FormData();
-    formData.append("song", form.value.song);
+    if (form.value.song) {
+        formData.append("song", form.value.song);
+    } else {
+        formData.append("song_id", form.value.song_id);
+    }
     formData.append("effect", form.value.effect);
     processing.value = true;
     axios
@@ -58,7 +63,7 @@ function processAudio() {
         <span>Обрабатываем ваш трек...</span>
     </div>
     <form @submit.prevent="processAudio" class="form" v-else>
-        <label class="song-input" :class="{ active: form.song }">
+        <label class="song-input" :class="{ active: form.song || song }">
             <input
                 type="file"
                 name="song"
@@ -69,12 +74,15 @@ function processAudio() {
         <div v-if="form.song" class="selected-song">
             Выбран файл: {{ form.song.name }}
         </div>
+        <div v-else-if="song" class="selected-song">
+            Выбран файл: {{ song.original_filename }}
+        </div>
         <Buttons :elems="effects" name="effect" v-model="form.effect" />
         <button
             type="submit"
             class="button"
             :class="{ 'button-loader': processing }"
-            :disabled="processing || !form.song"
+            :disabled="processing || (!form.song && !song)"
         >
             Создать ремикс! - 1
             <BalanceIcon />
@@ -136,6 +144,8 @@ function processAudio() {
 .selected-song {
     text-align: center;
     font-size: 10px;
+    overflow-wrap: break-word;
+    word-break: break-all;
 }
 
 .processing {

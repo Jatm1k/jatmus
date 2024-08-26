@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import Icon from "./UI/Icon.vue";
+import axios from "axios";
 
 const props = defineProps({
     song: {
@@ -13,6 +14,17 @@ const audioPlayer = ref(null);
 const isPlaying = ref(false);
 const duration = ref(0);
 const currentTime = ref(0);
+
+const sendAudio = (url) => {
+    axios
+        .post("/send-audio", { url })
+        .then((response) => {
+            tg.showAlert(response.data.message);
+        })
+        .catch((error) => {
+            tg.showAlert(error.response.data.message);
+        });
+};
 
 const togglePlay = () => {
     if (isPlaying.value) {
@@ -60,7 +72,7 @@ watch(
     <div class="player">
         <audio
             ref="audioPlayer"
-            :src="song.processed_path"
+            :src="song.processed_url"
             @timeupdate="onTimeUpdate"
             @loadedmetadata="onLoadedMetadata"
         ></audio>
@@ -79,9 +91,12 @@ watch(
                 :value="currentTime"
                 @input="seek"
             />
-            <a :href="url" download class="player__button"
-                ><Icon name="download"
-            /></a>
+            <button
+                @click="sendAudio(song.processed_path)"
+                class="player__button"
+            >
+                <Icon name="download" />
+            </button>
         </div>
     </div>
 </template>
@@ -99,6 +114,8 @@ watch(
     width: 100%;
     margin-bottom: 10px;
     text-align: center;
+    overflow-wrap: break-word;
+    word-break: break-all;
 }
 
 .player__controls {

@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\SongProcessRequest;
 use Illuminate\Support\Facades\Auth;
 use Log;
+use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Internal\InputFile;
 
 class MainController extends Controller
 {
@@ -24,6 +26,11 @@ class MainController extends Controller
         return Inertia::render('Home');
     }
 
+    public function remixBySong(Song $song)
+    {
+        return Inertia::render('Home', ['song' => $song]);
+    }
+
     public function process(SongProcessRequest $request)
     {
         $user = Auth::user();
@@ -34,27 +41,46 @@ class MainController extends Controller
             ], 403);
         }
 
-        $originalFile = $request->file('song');
-        $originalFilename = $originalFile->getClientOriginalName();
-        $originalPath = $originalFile->store('songs', 'public');
+        if($request->hasFile('song')) {
+            $originalFile = $request->file('song');
+            $originalFilename = $originalFile->getClientOriginalName();
+            $originalPath = $originalFile->store('songs', 'public');
+        } else {
+            $song = Song::find($request->song_id);
+            $originalFilename = $song->original_filename;
+            $originalPath = $song->original_path;
+        }
 
         $origName = pathinfo($originalFilename, PATHINFO_FILENAME);
-        $processedFilename = "{$origName} (JatMusicBot {$request->effect} remix).{$originalFile->extension()}";
+        $origExtension = pathinfo($originalFilename, PATHINFO_EXTENSION);
+        $processedFilename = "{$origName} (JatMusicBot {$request->effect} remix).{$origExtension}";
         $outputPath = "processed/{$processedFilename}";
 
         $command = $this->songService->makeCommand($request->effect, $originalPath, $outputPath);
         exec($command . ' 2>&1', $output, $return_var);
 
         if ($return_var === 0) {
-            $song = Song::create([
-                'user_id' => $user->id,
-                'original_filename' => $originalFilename,
-                'processed_filename' => $processedFilename,
-                'original_path' => Storage::url($originalPath),
-                'processed_path' => Storage::url($outputPath),
-                'effect' => $request->effect,
-            ]);
+            if(isset($song)) {
+                $song->update([
+                    'processed_filename' => $processedFilename,
+                    'processed_path' => $outputPath,
+                    'processed_url' => Storage::url($outputPath),
+                    'effect' => $request->effect,
+                ]);
+            } else {
+                $song = Song::create([
+                    'user_id' => $user->id,
+                    'original_filename' => $originalFilename,
+                    'processed_filename' => $processedFilename,
+                    'original_path' => $originalPath,
+                    'processed_path' => $outputPath,
+                    'original_url' => Storage::url($originalPath),
+                    'processed_url' => Storage::url($outputPath),
+                    'effect' => $request->effect,
+                ]);
+            }
             Cache::forget('feed');
+            Cache::forget("profile_{$user->id}");
             $user->decrement('balance');
 
             return response()->json(['song' => $song]);
@@ -66,7 +92,7 @@ class MainController extends Controller
     public function feed()
     {
         $songs = Cache::remember('feed', Carbon::now()->addDay(), function () {
-            return Song::query()->whereDate('created_at', Carbon::today())->get();
+            return Song::query()->whereNotNull('processed_url')->whereDate('created_at', Carbon::today())->get();
         });
         return Inertia::render('Feed', ['songs' => $songs]);
     }
@@ -79,8 +105,34 @@ class MainController extends Controller
     {
         $user = Auth::user();
         $songs = Cache::remember("profile_{$user->id}", Carbon::now()->addDay(), function () use ($user) {
-            return Song::query()->where('user_id', $user->id)->get();
+            return Song::query()->where('user_id', $user->id)->whereNotNull('processed_url')->get();
         });
         return Inertia::render('Profile', ['songs' => $songs]);
+    }
+
+    public function sendAudio(Request $request, Nutgram $bot)
+    {
+        if (!$request->url) {
+            return response()->json([
+                'code' => 'send_error',
+                'message' => 'Ошибка отправки трека',
+            ], 400);
+        }
+        if (!Storage::disk('public')->exists($request->url)) {
+            return response()->json([
+                'code' => 'send_error',
+                'message' => 'Файл не найден',
+            ], 404);
+        }
+        if (!auth()->check()) {
+            return response()->json([
+                'code' => 'send_error',
+                'message' => 'Ошибка авторизации',
+            ], 403);
+        }
+
+        $bot->sendAudio(InputFile::make(storage_path('app/public/' .$request->url)), auth()->user()->id);
+
+        return response()->json(['message' => 'Трек отправлен']);
     }
 }

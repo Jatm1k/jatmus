@@ -15,6 +15,13 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        if (!$request->id) {
+            return response()->json([
+                'code' => 'auth_error',
+                'message' => 'Ошибка авторизации, попробуйте перезагрузить приложение',
+            ], 403);
+        }
+
         $user = User::firstOrCreate(
             [
                 'id' => $request->id,

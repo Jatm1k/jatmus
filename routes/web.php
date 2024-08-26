@@ -5,6 +5,7 @@ use App\Http\Controllers\MainController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [MainController::class, 'index'])->name('home');
+Route::get('/remix/{song}', [MainController::class, 'remixBySong'])->name('remix');
 Route::post('/process', [MainController::class, 'process'])->name('process');
 
 Route::get('/feed', [MainController::class, 'feed'])->name('feed');
@@ -13,3 +14,5 @@ Route::get('/profile', [MainController::class, 'profile'])->name('profile');
 
 Route::post('/auth/check', [AuthController::class, 'checkAuth'])->name('auth.check');
 Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
+
+Route::post('/send-audio', [MainController::class, 'sendAudio'])->name('send-audio');

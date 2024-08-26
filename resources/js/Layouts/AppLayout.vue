@@ -2,6 +2,7 @@
 import { Link } from "@inertiajs/vue3";
 import Icon from "../Components/UI/Icon.vue";
 import BalanceIcon from "../Components/UI/BalanceIcon.vue";
+import Logo from "../Components/UI/Logo.vue";
 import { provide, ref } from "vue";
 import axios from "axios";
 
@@ -19,16 +20,26 @@ const tgUser = tg.initDataUnsafe.user;
 
 const user = ref(null);
 function auth() {
-    axios.post("/auth/check").then((res) => {
-        if (res.data.auth) {
-            user.value = res.data.user;
-        } else {
-            axios.post("/auth/login", tgUser).then((res) => {
+    axios
+        .post("/auth/check")
+        .then((res) => {
+            if (res.data.auth) {
                 user.value = res.data.user;
-            });
-        }
-        loadApp.value = false;
-    });
+            } else {
+                axios
+                    .post("/auth/login", tgUser)
+                    .then((res) => {
+                        user.value = res.data.user;
+                    })
+                    .catch((error) => {
+                        tg.showAlert(error.response.data.message);
+                    });
+            }
+            loadApp.value = false;
+        })
+        .catch((error) => {
+            tg.showAlert(error.response.data.message);
+        });
 }
 
 auth();
@@ -42,11 +53,7 @@ provide("user", user);
     <div class="container" v-else>
         <div class="header">
             <a href="https://t.me/jatmusic">
-                <img
-                    src="/assets/img/logo.svg"
-                    alt="logo"
-                    class="header__logo"
-                />
+                <Logo />
             </a>
             <span class="balance">
                 {{ user ? user.balance : 0 }} <BalanceIcon />
@@ -73,7 +80,7 @@ provide("user", user);
 .loader-container {
     max-width: 500px;
     margin: 0 auto;
-    border: 1px solid var(--border-color);
+    /* border: 1px solid var(--border-color); */
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -119,7 +126,7 @@ provide("user", user);
 }
 
 .footer__link {
-    font-size: 32px;
+    font-size: 26px;
 }
 
 .footer__link.active {

@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->string('processed_filename')->nullable();
             $table->string('processed_path')->nullable();
             $table->string('original_path')->nullable();
+            $table->string('processed_url')->nullable();
+            $table->string('original_url')->nullable();
             $table->string('effect')->nullable();
             $table->timestamps();
         });

@@ -10,7 +10,8 @@ class SongProcessRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'song' => ['required', File::types(['mp3', 'wav'])->max('20mb')],
+            'song' => ['sometimes', 'required_without:song_id', File::types(['mp3', 'wav'])->max('20mb')],
+            'song_id' => ['sometimes', 'required_without:song', 'integer', 'exists:songs,id'],
             'effect' => ['required', 'string', 'in:speed_up,slowed,8d,bass'],
         ];
     }

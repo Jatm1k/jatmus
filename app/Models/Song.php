@@ -13,6 +13,8 @@ class Song extends Model
         'processed_filename',
         'processed_path',
         'original_path',
+        'processed_url',
+        'original_url',
         'effect'
     ];
 
