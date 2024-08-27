@@ -101,7 +101,7 @@ provide("user", user);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px;
+    padding: 4px 16px;
 }
 
 .header__logo {
@@ -121,7 +121,7 @@ provide("user", user);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 16px;
+    padding: 12px 16px;
     border-top: 1px solid var(--border-color);
 }
 
