@@ -27,7 +27,7 @@ class SongService
             $filter = "equalizer=f=60:t=q:w=1:g=10";
             // $filter = "bass=g=20,bass=g=15,bass=g=10,dynaudnorm";
         }
-        $command = "ffmpeg -y -i {$input} -filter_complex \"{$filter}\" \"{$output}\"";
+        $command = "ffmpeg -y -i \"{$input}\" -filter_complex \"{$filter}\" \"{$output}\"";
         return $command;
     }
 }
