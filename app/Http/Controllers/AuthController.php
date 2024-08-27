@@ -31,6 +31,9 @@ class AuthController extends Controller
                 'username' => $request->username,
             ]
         );
+        if(!$user->id) {
+            $user = User::find($request->id);
+        }
 
         Auth::login($user);
         return response()->json(['user' => $user]);
