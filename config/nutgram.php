@@ -22,4 +22,6 @@ return [
 
     // Set log channel
     'log_channel' => env('TELEGRAM_LOG_CHANNEL', 'null'),
+
+    'clientTimeout' => 30,
 ];

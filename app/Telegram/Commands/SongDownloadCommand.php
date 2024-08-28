@@ -42,6 +42,7 @@ class SongDownloadCommand extends Command
                 $bot->sendMessage('Произошла ошибка при загрузке трека');
             }
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             $bot->sendMessage('Произошла ошибка при загрузке трека');
         }
     }
