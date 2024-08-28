@@ -7,6 +7,7 @@ import Icon from "./Icon.vue";
 
 <style scoped>
 .balance__icon {
+    font-size: 12px;
     color: var(--primary-color-100);
 }
 </style>

@@ -14,5 +14,6 @@ Route::get('/profile', [MainController::class, 'profile'])->name('profile');
 
 Route::post('/auth/check', [AuthController::class, 'checkAuth'])->name('auth.check');
 Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
+Route::post('/daily-reward', [AuthController::class, 'getDailyReward'])->name('daily-reward');
 
 Route::post('/send-audio', [MainController::class, 'sendAudio'])->name('send-audio');

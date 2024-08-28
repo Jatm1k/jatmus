@@ -3,6 +3,7 @@ import { Link } from "@inertiajs/vue3";
 import Icon from "../Components/UI/Icon.vue";
 import BalanceIcon from "../Components/UI/BalanceIcon.vue";
 import Logo from "../Components/UI/Logo.vue";
+import DailyReward from "../Components/DailyReward.vue";
 import { provide, ref } from "vue";
 import axios from "axios";
 
@@ -51,6 +52,7 @@ provide("user", user);
         <div class="loader"></div>
     </div>
     <div class="container" v-else>
+        <DailyReward />
         <div class="header">
             <a href="https://t.me/jatmusic">
                 <Logo />
