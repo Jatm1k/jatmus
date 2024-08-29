@@ -49,11 +49,11 @@ auth();
 provide("user", user);
 </script>
 <template>
-    <div class="loader-container" v-if="loadApp">
+    <div class="loader-container" v-if="loadApp || !user">
         <div class="loader"></div>
     </div>
     <div class="container" v-else>
-        <DailyReward />
+        <DailyReward v-if="user" />
         <div class="header">
             <a href="https://t.me/jatmusic">
                 <Logo />

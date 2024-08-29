@@ -9,13 +9,14 @@ const props = defineProps({
         required: true,
     },
 });
-
+const tg = window.Telegram.WebApp;
 const audioPlayer = ref(null);
 const isPlaying = ref(false);
 const duration = ref(0);
 const currentTime = ref(0);
-
+const isDownloadButtonLoad = ref(true);
 const sendAudio = (url) => {
+    isDownloadButtonLoad.value = true;
     axios
         .post("/send-audio", { url })
         .then((response) => {
@@ -24,6 +25,7 @@ const sendAudio = (url) => {
         .catch((error) => {
             tg.showAlert(error.response.data.message);
         });
+    isDownloadButtonLoad.value = false;
 };
 
 const togglePlay = () => {
@@ -94,6 +96,7 @@ watch(
             <button
                 @click="sendAudio(song.processed_path)"
                 class="player__button"
+                :disabled="isDownloadButtonLoad"
             >
                 <Icon name="download" />
             </button>

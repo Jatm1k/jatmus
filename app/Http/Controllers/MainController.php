@@ -60,11 +60,12 @@ class MainController extends Controller
         exec($command . ' 2>&1', $output, $return_var);
 
         if ($return_var === 0) {
+            $encodedPath = 'processed/' . rawurlencode($processedFilename);
             if(isset($song)) {
                 $song->update([
                     'processed_filename' => $processedFilename,
                     'processed_path' => $outputPath,
-                    'processed_url' => Storage::url($outputPath),
+                    'processed_url' => Storage::url($encodedPath),
                     'effect' => $request->effect,
                 ]);
             } else {
@@ -75,7 +76,7 @@ class MainController extends Controller
                     'original_path' => $originalPath,
                     'processed_path' => $outputPath,
                     'original_url' => Storage::url($originalPath),
-                    'processed_url' => Storage::url($outputPath),
+                    'processed_url' => Storage::url($encodedPath),
                     'effect' => $request->effect,
                 ]);
             }
