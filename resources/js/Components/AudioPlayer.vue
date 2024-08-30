@@ -14,7 +14,7 @@ const audioPlayer = ref(null);
 const isPlaying = ref(false);
 const duration = ref(0);
 const currentTime = ref(0);
-const isDownloadButtonLoad = ref(true);
+const isDownloadButtonLoad = ref(false);
 const sendAudio = (url) => {
     isDownloadButtonLoad.value = true;
     axios
