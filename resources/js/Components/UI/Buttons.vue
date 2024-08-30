@@ -59,6 +59,7 @@ const onChange = (value) => {
     text-align: center;
     border-radius: 4px;
     padding: 4px 3px;
+    font-size: 12px;
 }
 .radio-button.active {
     transition: all 1s;

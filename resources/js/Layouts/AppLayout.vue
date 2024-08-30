@@ -124,15 +124,22 @@ provide("user", user);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border-color);
+    padding: 0px 16px;
+    gap: 32px;
+    /* border-top: 1px solid var(--border-color); */
 }
 
 .footer__link {
     font-size: 26px;
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    border-radius: 4px;
+    /* border-top: 5px solid var(--border-color); */
 }
 
 .footer__link.active {
+    border-top: 5px solid var(--primary-color-100);
     color: var(--primary-color-100);
 }
 

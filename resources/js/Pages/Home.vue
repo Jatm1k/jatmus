@@ -3,6 +3,7 @@ import { useForm } from "@inertiajs/vue3";
 import AudioPlayer from "../Components/AudioPlayer.vue";
 import Buttons from "../Components/UI/Buttons.vue";
 import BalanceIcon from "../Components/UI/BalanceIcon.vue";
+import Block from "../Components/UI/Block.vue";
 import { inject, ref } from "vue";
 import axios from "axios";
 
@@ -62,36 +63,40 @@ function processAudio() {
         />
         <span>Обрабатываем ваш трек...</span>
     </div>
-    <form @submit.prevent="processAudio" class="form" v-else>
-        <label class="song-input" :class="{ active: form.song || song }">
-            <input
-                type="file"
-                name="song"
-                @input="form.song = $event.target.files[0]"
-                accept="audio/*"
-            />
-        </label>
-        <div v-if="form.song" class="selected-song">
-            Выбран файл: {{ form.song.name }}
+    <Block v-else>
+        <form @submit.prevent="processAudio" class="form">
+            <label class="song-input" :class="{ active: form.song || song }">
+                <input
+                    type="file"
+                    name="song"
+                    @input="form.song = $event.target.files[0]"
+                    accept="audio/*"
+                />
+            </label>
+            <div v-if="form.song" class="selected-song">
+                Выбран файл: {{ form.song.name }}
+            </div>
+            <div v-else-if="song" class="selected-song">
+                Выбран файл: {{ song.original_filename }}
+            </div>
+            <Buttons :elems="effects" name="effect" v-model="form.effect" />
+            <button
+                type="submit"
+                class="button"
+                :class="{ 'button-loader': processing }"
+                :disabled="processing || (!form.song && !song)"
+            >
+                Создать ремикс! - 1
+                <BalanceIcon />
+            </button>
+        </form>
+    </Block>
+    <Block v-if="processedSong">
+        <div class="processed-song">
+            <h2>Результат:</h2>
+            <AudioPlayer :song="processedSong" />
         </div>
-        <div v-else-if="song" class="selected-song">
-            Выбран файл: {{ song.original_filename }}
-        </div>
-        <Buttons :elems="effects" name="effect" v-model="form.effect" />
-        <button
-            type="submit"
-            class="button"
-            :class="{ 'button-loader': processing }"
-            :disabled="processing || (!form.song && !song)"
-        >
-            Создать ремикс! - 1
-            <BalanceIcon />
-        </button>
-    </form>
-    <div class="processed-song" v-if="processedSong">
-        <h2>Результат:</h2>
-        <AudioPlayer :song="processedSong" />
-    </div>
+    </Block>
 </template>
 
 <style scoped>

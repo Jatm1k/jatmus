@@ -78,7 +78,9 @@ watch(
             @timeupdate="onTimeUpdate"
             @loadedmetadata="onLoadedMetadata"
         ></audio>
-        <span class="player__filename">{{ song.processed_filename }}</span>
+        <div class="player__filename-wrapper">
+            <span class="player__filename">{{ song.processed_filename }}</span>
+        </div>
         <span class="player__timer"
             >{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span
         >
@@ -106,8 +108,10 @@ watch(
 
 <style>
 .player {
+    width: 100%;
     padding: 20px;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
+    /* background-color: var(--bg-color-300); */
     border-radius: 5px;
 }
 
@@ -119,6 +123,7 @@ watch(
     text-align: center;
     overflow-wrap: break-word;
     word-break: break-all;
+    font-size: 10px;
 }
 
 .player__controls {
