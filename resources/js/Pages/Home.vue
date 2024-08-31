@@ -49,8 +49,8 @@ function processAudio() {
             user.value.balance = --user.value.balance;
         })
         .catch((error) => {
-            tg.showAlert(error.response.data.message);
             processing.value = false;
+            tg.showAlert(error.response.data.message);
         });
 }
 </script>
@@ -91,7 +91,7 @@ function processAudio() {
             </button>
         </form>
     </Block>
-    <Block v-if="processedSong">
+    <Block v-if="processedSong && !processing">
         <div class="processed-song">
             <h2>Результат:</h2>
             <AudioPlayer :song="processedSong" />
@@ -106,7 +106,6 @@ function processAudio() {
     align-items: center;
     justify-content: center;
     gap: 16px;
-    margin-bottom: 32px;
 }
 
 .song-input {
