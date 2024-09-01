@@ -33,7 +33,7 @@ class AuthController extends Controller
                 'username' => $request->username,
             ]
         );
-        if(!$user->id) {
+        if (!$user->id) {
             $user = User::find($request->id);
         }
 
@@ -82,12 +82,6 @@ class AuthController extends Controller
 
     private function calculateRewardAmount(int $streak)
     {
-        if($streak <= 3) {
-            return 1;
-        } elseif($streak <= 6) {
-            return 2;
-        } elseif($streak >= 7) {
-            return 3;
-        }
+        return $streak > 5 ? 5 : $streak;
     }
 }
