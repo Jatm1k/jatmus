@@ -33,42 +33,35 @@ class MainController extends Controller
 
     public function process(SongProcessRequest $request)
     {
-        $user = Auth::user();
-        if ($user->balance <= 0) {
-            return response()->json([
-                'code' => 'balance_error',
-                'message' => 'Пополните баланс для создания ремикса',
-            ], 403);
-        }
+        try {
+            $user = Auth::user();
+            if ($user->balance <= 0) {
+                return response()->json([
+                    'code' => 'balance_error',
+                    'message' => 'Пополните баланс для создания ремикса',
+                ], 403);
+            }
 
-        if($request->hasFile('song')) {
-            $originalFile = $request->file('song');
-            $originalFilename = $originalFile->getClientOriginalName();
-            $originalPath = $originalFile->store('songs', 'public');
-        } else {
-            $song = Song::find($request->song_id);
-            $originalFilename = $song->original_filename;
-            $originalPath = $song->original_path;
-        }
-
-        $origName = pathinfo($originalFilename, PATHINFO_FILENAME);
-        $origExtension = pathinfo($originalFilename, PATHINFO_EXTENSION);
-        $processedFilename = "{$origName} (JatMusicBot {$request->effect} remix).{$origExtension}";
-        $outputPath = "processed/{$processedFilename}";
-
-        $command = $this->songService->makeCommand($request->effect, $originalPath, $outputPath);
-        exec($command . ' 2>&1', $output, $return_var);
-
-        if ($return_var === 0) {
-            $encodedPath = 'processed/' . rawurlencode($processedFilename);
-            if(isset($song)) {
-                $song->update([
-                    'processed_filename' => $processedFilename,
-                    'processed_path' => $outputPath,
-                    'processed_url' => Storage::url($encodedPath),
-                    'effect' => $request->effect,
-                ]);
+            if($request->hasFile('song')) {
+                $originalFile = $request->file('song');
+                $originalFilename = $originalFile->getClientOriginalName();
+                $originalPath = $originalFile->store('songs', 'public');
             } else {
+                $song = Song::find($request->song_id);
+                $originalFilename = $song->original_filename;
+                $originalPath = $song->original_path;
+            }
+
+            $origName = pathinfo($originalFilename, PATHINFO_FILENAME);
+            $origExtension = pathinfo($originalFilename, PATHINFO_EXTENSION);
+            $processedFilename = "{$origName} (JatMusicBot {$request->effect} remix).{$origExtension}";
+            $outputPath = "processed/{$processedFilename}";
+
+            $command = $this->songService->makeCommand($request->effect, $originalPath, $outputPath);
+            exec($command . ' 2>&1', $output, $return_var);
+
+            if ($return_var === 0) {
+                $encodedPath = 'processed/' . rawurlencode($processedFilename);
                 $song = Song::create([
                     'user_id' => $user->id,
                     'original_filename' => $originalFilename,
@@ -79,20 +72,23 @@ class MainController extends Controller
                     'processed_url' => Storage::url($encodedPath),
                     'effect' => $request->effect,
                 ]);
-            }
-            Cache::forget('feed');
-            Cache::forget("profile_{$user->id}");
-            $user->decrement('balance');
+                Cache::forget('feed');
+                Cache::forget("profile_{$user->id}");
+                $user->decrement('balance');
 
-            return response()->json(['song' => $song]);
-        } else {
-            Log::error('Ошибка обработки трека', [$command, $output, $return_var]);
+                return response()->json(['song' => $song]);
+            } else {
+                Log::error('Ошибка обработки трека', [$command, $output, $return_var]);
+                return response()->json(['error' => 'Произошла ошибка при обработке трека'], 500);
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return response()->json(['error' => 'Произошла ошибка при обработке трека'], 500);
         }
     }
     public function feed()
     {
-        $songs = Cache::remember('feed', Carbon::now()->addDay(), function () {
+        $songs = Cache::remember('feed', Carbon::now()->addHour(), function () {
             return Song::query()->whereNotNull('processed_url')->whereDate('created_at', Carbon::today())->get();
         });
         return Inertia::render('Feed', ['songs' => $songs]);
@@ -105,7 +101,7 @@ class MainController extends Controller
     public function profile()
     {
         $user = Auth::user();
-        $songs = Cache::remember("profile_{$user->id}", Carbon::now()->addDay(), function () use ($user) {
+        $songs = Cache::remember("profile_{$user->id}", Carbon::now()->addHour(), function () use ($user) {
             return Song::query()->where('user_id', $user->id)->whereNotNull('processed_url')->get();
         });
         return Inertia::render('Profile', ['songs' => $songs]);
@@ -131,8 +127,14 @@ class MainController extends Controller
                 'message' => 'Ошибка авторизации',
             ], 403);
         }
+        $link = env('TELEGRAM_BOT_LINK');
 
-        $bot->sendAudio(InputFile::make(storage_path('app/public/' .$request->url)), auth()->user()->id);
+        $bot->sendAudio(
+            audio: InputFile::make(storage_path('app/public/' .$request->url)),
+            chat_id: auth()->user()->id,
+            caption: "[Создать ремикс песни 🎧]({$link})",
+            parse_mode: 'MarkdownV2'
+        );
 
         return response()->json(['message' => 'Трек отправлен']);
     }

@@ -32,7 +32,7 @@ class SongDownloadCommand extends Command
                     'original_url' => Storage::url($file_path),
                 ]);
                 $bot->sendMessage(
-                    text: 'Трек загружен! Нажми на кнопку ниже, чтобы создать ремикс из этого трека!',
+                    text: "Трек {$file_name} загружен! Нажми на кнопку ниже, чтобы создать ремикс из этого трека!",
                     reply_markup: InlineKeyboardMarkup::make()->addRow(InlineKeyboardButton::make(
                         text: 'Создать ремикс!',
                         web_app: WebAppInfo::make(env('APP_URL') . "/remix/{$song->id}"),

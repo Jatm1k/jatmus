@@ -1,11 +1,12 @@
 <?php
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
-use App\Telegram\Commands\SongDownloadCommand;
+use App\Models\User;
 use SergiX44\Nutgram\Nutgram;
+use App\Telegram\Commands\SongDownloadCommand;
+use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
-use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,13 @@ use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 */
 
 $bot->onCommand('start', function (Nutgram $bot) {
+    if (!User::find($bot->userId())) {
+        User::create([
+            'id' => $bot->userId(),
+            'name' => $bot->user()->first_name,
+            'username' => $bot->user()->username,
+        ]);
+    }
     $bot->sendMessage(
         text: 'Привет! Я бот для создания ремиксов! Отправь мне трек или нажми кнопку ниже!',
         reply_markup: InlineKeyboardMarkup::make()->addRow(InlineKeyboardButton::make(

@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('username')->nullable();
             $table->boolean('is_premium')->default(false);
             $table->dateTime('premium_until')->nullable();
-            $table->integer('balance')->default(20);
+            $table->integer('balance')->default(10);
             $table->rememberToken();
             $table->timestamps();
         });

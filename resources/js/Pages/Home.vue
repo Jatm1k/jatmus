@@ -84,10 +84,17 @@ function processAudio() {
                 type="submit"
                 class="button"
                 :class="{ 'button-loader': processing }"
-                :disabled="processing || (!form.song && !song)"
+                :disabled="
+                    processing || (!form.song && !song) || user.balance <= 0
+                "
             >
-                Создать ремикс! - 1
-                <BalanceIcon />
+                <template v-if="user.balance > 0">
+                    Создать ремикс! - 1
+                    <BalanceIcon />
+                </template>
+                <template v-else
+                    >Недостаточно <BalanceIcon /> на балансе</template
+                >
             </button>
         </form>
     </Block>
