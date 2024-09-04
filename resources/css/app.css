@@ -54,6 +54,10 @@ a {
     color: var(--text-color);
 }
 
+.link {
+    color: var(--primary-color-100);
+}
+
 .emoji-image {
     width: clamp(6.25rem, 2.232rem + 42.86vw, 15.625rem);
     height: clamp(6.25rem, 2.232rem + 42.86vw, 15.625rem);

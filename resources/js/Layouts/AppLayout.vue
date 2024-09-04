@@ -16,6 +16,8 @@ const routes = [
 const loadApp = ref(true);
 
 const tg = window.Telegram.WebApp;
+console.log(tg);
+
 tg.expand();
 
 const tgUser = tg.initDataUnsafe.user;
@@ -50,7 +52,13 @@ provide("user", user);
 </script>
 <template>
     <div class="loader-container" v-if="loadApp || !user">
-        <div class="loader"></div>
+        <span class="loader-text" v-if="!tg.initData">
+            Приложение доступно только в
+            <a class="link" href="https://t.me/jatmusbot?start">
+                Telegram боте
+            </a>
+        </span>
+        <div class="loader" v-else></div>
     </div>
     <div class="container" v-else>
         <DailyReward v-if="user" />
@@ -62,7 +70,7 @@ provide("user", user);
                 {{ user ? user.balance : 0 }} <BalanceIcon />
             </span>
         </div>
-        <div class="content">
+        <div class="app-content">
             <slot />
         </div>
         <div class="footer">
@@ -94,7 +102,7 @@ provide("user", user);
     align-items: center;
 }
 
-.content {
+.app-content {
     flex: 1;
     padding: 32px 16px;
     overflow-y: auto;
