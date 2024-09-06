@@ -59,12 +59,15 @@ function processAudio() {
 function showAds() {
     AdController.show()
         .then((result) => {
-            // user watch ad till the end
-            // your code to reward user
+            axios
+                .post("/adsreward", { userid: user.value.id })
+                .then((response) => {
+                    user.value.balance += 2;
+                    tg.showAlert("Награда получена");
+                });
         })
         .catch((result) => {
-            // user get error during playing ad or skip ad
-            // do nothing or whatever you want
+            tg.showAlert("Произошла ошибка. Попробуйте ещё раз позже.");
         });
 }
 </script>
