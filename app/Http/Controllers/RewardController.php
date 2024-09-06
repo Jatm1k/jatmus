@@ -11,6 +11,7 @@ class RewardController extends Controller
     {
         $user = User::find($request->userid);
         $user->balance += 2;
+        $user->save();
 
         return response()->noContent();
     }
