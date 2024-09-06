@@ -11,6 +11,8 @@ const user = inject("user");
 
 const tg = window.Telegram.WebApp;
 
+const AdController = window.Adsgram.init({ blockId: "2780" });
+
 const props = defineProps(["song"]);
 
 const effects = [
@@ -51,6 +53,18 @@ function processAudio() {
         .catch((error) => {
             processing.value = false;
             tg.showAlert(error.response.data.message);
+        });
+}
+
+function showAds() {
+    AdController.show()
+        .then((result) => {
+            // user watch ad till the end
+            // your code to reward user
+        })
+        .catch((result) => {
+            // user get error during playing ad or skip ad
+            // do nothing or whatever you want
         });
 }
 </script>
@@ -95,6 +109,14 @@ function processAudio() {
                 <template v-else
                     >Недостаточно <BalanceIcon /> на балансе</template
                 >
+            </button>
+            <button
+                class="button"
+                @click.prevent="showAds"
+                v-if="user.balance > 100"
+            >
+                Получить 2
+                <BalanceIcon />
             </button>
         </form>
     </Block>

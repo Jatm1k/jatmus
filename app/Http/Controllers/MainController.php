@@ -42,7 +42,7 @@ class MainController extends Controller
                 ], 403);
             }
 
-            if($request->hasFile('song')) {
+            if ($request->hasFile('song')) {
                 $originalFile = $request->file('song');
                 $originalFilename = $originalFile->getClientOriginalName();
                 $originalPath = $originalFile->store('songs', 'public');
