@@ -4,6 +4,8 @@ import AudioPlayer from "../Components/AudioPlayer.vue";
 import Buttons from "../Components/UI/Buttons.vue";
 import BalanceIcon from "../Components/UI/BalanceIcon.vue";
 import Block from "../Components/UI/Block.vue";
+import TimerButton from "../Components/UI/TimerButton.vue";
+import Popup from "../Components/UI/Popup.vue";
 import { inject, ref } from "vue";
 import axios from "axios";
 
@@ -12,7 +14,7 @@ const user = inject("user");
 const tg = window.Telegram.WebApp;
 
 const AdController = window.Adsgram.init({ blockId: "2780" });
-
+const showAdPopup = ref(false);
 const props = defineProps(["song"]);
 
 const effects = [
@@ -57,17 +59,46 @@ function processAudio() {
 }
 
 function showAds() {
+    showAdPopup.value = !showAdPopup.value;
     AdController.show()
         .then((result) => {
             user.value.balance += 2;
+            addFiveMinutes();
             tg.showAlert("Награда получена");
         })
         .catch((result) => {
             tg.showAlert("Произошла ошибка. Попробуйте ещё раз позже.");
         });
 }
+
+function showAdPopupHandler() {
+    showAdPopup.value = !showAdPopup.value;
+}
+
+function addFiveMinutes() {
+    const now = new Date();
+
+    now.setMinutes(now.getMinutes() + 5);
+
+    user.value.next_ad_view = formatDate(now);
+}
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
 </script>
 <template>
+    <Popup :show="showAdPopup" @close="showAdPopup = false">
+        <h3>Бесплатный бонус</h3>
+        <p>Посмотри короткую рекламу и получи 2 <BalanceIcon /></p>
+        <button class="button" @click.prevent="showAds">Забрать бонус</button>
+    </Popup>
     <div class="processing" v-if="processing">
         <img
             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Objects/Hourglass%20Done.webp"
@@ -93,30 +124,32 @@ function showAds() {
                 Выбран файл: {{ song.original_filename }}
             </div>
             <Buttons :elems="effects" name="effect" v-model="form.effect" />
-            <button
-                type="submit"
-                class="button"
-                :class="{ 'button-loader': processing }"
-                :disabled="
-                    processing || (!form.song && !song) || user.balance <= 0
-                "
-            >
-                <template v-if="user.balance > 0">
-                    Создать ремикс! - 1
-                    <BalanceIcon />
-                </template>
-                <template v-else
-                    >Недостаточно <BalanceIcon /> на балансе</template
+            <div class="buttons-wrapper">
+                <button
+                    type="submit"
+                    class="button form-button"
+                    :class="{ 'button-loader': processing }"
+                    :disabled="
+                        processing || (!form.song && !song) || user.balance <= 0
+                    "
                 >
-            </button>
-            <button
-                class="button"
-                @click.prevent="showAds"
-                v-if="user.balance > 100"
-            >
-                Получить 2
-                <BalanceIcon />
-            </button>
+                    <template v-if="user.balance > 0">
+                        Создать ремикс! - 1
+                        <BalanceIcon />
+                    </template>
+                    <template v-else
+                        >Недостаточно <BalanceIcon /> на балансе</template
+                    >
+                </button>
+                <TimerButton
+                    class="button ads-button"
+                    @click.prevent="showAdPopupHandler"
+                    :time="user.next_ad_view"
+                    v-if="user.balance > 100"
+                >
+                    +2 <BalanceIcon />
+                </TimerButton>
+            </div>
         </form>
     </Block>
     <Block v-if="processedSong && !processing">
@@ -211,5 +244,18 @@ function showAds() {
     100% {
         background-position: top left;
     }
+}
+
+.buttons-wrapper {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+}
+
+.buttons-wrapper .form-button {
+    flex: 8;
+}
+.buttons-wrapper .ads-button {
+    flex: 2;
 }
 </style>
