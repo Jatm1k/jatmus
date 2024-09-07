@@ -97,7 +97,7 @@ function formatDate(date) {
 <template>
     <Popup :show="showAdPopup" @close="showAdPopup = false">
         <h3>Бесплатный бонус</h3>
-        <p>Посмотри короткую рекламу и получи 2 <BalanceIcon /></p>
+        <p>Посмотри рекламу и получи 2 <BalanceIcon /></p>
         <button class="button" @click.prevent="showAds">Забрать бонус</button>
     </Popup>
     <div class="processing" v-if="processing">
@@ -146,7 +146,6 @@ function formatDate(date) {
                     class="button ads-button"
                     @click.prevent="showAdPopupHandler"
                     :time="user.next_ad_view"
-                    v-if="user.balance > 100"
                 >
                     +2 <BalanceIcon />
                 </TimerButton>
