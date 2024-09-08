@@ -1,8 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MainController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RewardController;
 
 Route::get('/', [MainController::class, 'index'])->name('home');
 Route::get('/remix/{song}', [MainController::class, 'remixBySong'])->name('remix');

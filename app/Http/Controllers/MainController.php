@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Song;
+use Log;
 use Cache;
+use FFMpeg\FFMpeg;
+use App\Models\Song;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Services\SongService;
+use SergiX44\Nutgram\Nutgram;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\SongProcessRequest;
-use Illuminate\Support\Facades\Auth;
-use Log;
-use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Internal\InputFile;
 
 class MainController extends Controller
@@ -59,7 +60,11 @@ class MainController extends Controller
 
             $command = $this->songService->makeCommand($request->effect, $originalPath, $outputPath);
             exec($command . ' 2>&1', $output, $return_var);
-
+            $duration = $this->getAudioDuration(storage_path('app/public/' . $outputPath));
+            if ($duration < 5) {
+                $command = $this->songService->makeCommand($request->effect, $originalPath, $outputPath, true);
+                exec($command . ' 2>&1', $output, $return_var);
+            }
             if ($return_var === 0) {
                 $encodedPath = 'processed/' . rawurlencode($processedFilename);
                 $song = Song::create([
@@ -79,13 +84,31 @@ class MainController extends Controller
                 return response()->json(['song' => $song]);
             } else {
                 Log::error('Ошибка обработки трека', [$command, $output, $return_var]);
-                return response()->json(['error' => 'Произошла ошибка при обработке трека'], 500);
+                return response()->json(['message' => 'Произошла ошибка при обработке трека'], 500);
             }
         } catch (\Exception $e) {
             Log::error($e->getMessage());
-            return response()->json(['error' => 'Произошла ошибка при обработке трека'], 500);
+            return response()->json(['message' => 'Произошла ошибка при обработке трека'], 500);
         }
     }
+
+    private function getAudioDuration($filePath)
+    {
+        // Создаем экземпляр FFMpeg
+        $ffmpeg = FFMpeg::create();
+
+        // Загружаем аудиофайл
+        $audio = $ffmpeg->open($filePath);
+
+        // Получаем информацию о формате
+        $format = $audio->getFormat();
+
+        // Извлекаем длительность в секундах
+        $duration = $format->get('duration');
+
+        return $duration;
+    }
+
     public function feed()
     {
         $songs = Cache::remember('feed', Carbon::now()->addHour(), function () {

@@ -11,6 +11,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "nutgram/laravel": "^1.4",
+        "php-ffmpeg/php-ffmpeg": "^1.2",
         "tightenco/ziggy": "^1.6"
     },
     "require-dev": {

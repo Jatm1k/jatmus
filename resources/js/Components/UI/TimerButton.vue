@@ -18,7 +18,7 @@ const formattedTime = computed(() => {
 
 function parseToUTC(dateString) {
     // Преобразуем строку в формат ISO 8601
-    const isoString = dateString.replace(" ", "T") + "Z";
+    const isoString = dateString?.replace(" ", "T") + "Z";
     return new Date(isoString);
 }
 
