@@ -6,6 +6,7 @@ import BalanceIcon from "../Components/UI/BalanceIcon.vue";
 import Block from "../Components/UI/Block.vue";
 import TimerButton from "../Components/UI/TimerButton.vue";
 import Popup from "../Components/UI/Popup.vue";
+import Song from "../Components/UI/Song.vue";
 import { inject, ref } from "vue";
 import axios from "axios";
 
@@ -155,7 +156,7 @@ function formatDate(date) {
     <Block v-if="processedSong && !processing">
         <div class="processed-song">
             <h2>Результат:</h2>
-            <AudioPlayer :song="processedSong" />
+            <Song :song="processedSong" />
         </div>
     </Block>
 </template>

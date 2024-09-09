@@ -77,6 +77,7 @@ class MainController extends Controller
                     'processed_url' => Storage::url($encodedPath),
                     'effect' => $request->effect,
                 ]);
+                $song->load('user');
                 Cache::forget('feed');
                 Cache::forget("profile_{$user->id}");
                 $user->decrement('balance');
