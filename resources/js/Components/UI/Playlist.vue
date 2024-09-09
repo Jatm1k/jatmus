@@ -1,12 +1,13 @@
 <script setup>
 import AudioPlayer from "../AudioPlayer.vue";
+import Song from "./Song.vue";
 const props = defineProps({
     songs: Array,
 });
 </script>
 <template>
     <div class="playlist" v-if="songs.length > 0">
-        <audio-player v-for="song in songs" :song="song" :key="song.id" />
+        <song v-for="song in songs" :song="song" :key="song.id" />
     </div>
     <div class="playlist-empty" v-else>
         <img
@@ -22,7 +23,7 @@ const props = defineProps({
 .playlist {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 6px;
 }
 
 .playlist-empty {

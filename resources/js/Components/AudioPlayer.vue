@@ -106,7 +106,7 @@ watch(
     </div>
 </template>
 
-<style>
+<style scoped>
 .player {
     width: 100%;
     padding: 20px;

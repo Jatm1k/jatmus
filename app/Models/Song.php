@@ -20,6 +20,8 @@ class Song extends Model
         'effect'
     ];
 
+    protected $with = ['user'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

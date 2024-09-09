@@ -6,6 +6,8 @@ import Logo from "../Components/UI/Logo.vue";
 import DailyReward from "../Components/DailyReward.vue";
 import { provide, ref } from "vue";
 import axios from "axios";
+import NewAudioPlayer from "../Components/NewAudioPlayer.vue";
+import { store } from "../store";
 
 const routes = [
     { name: "profile", icon: "user" },
@@ -73,6 +75,7 @@ provide("user", user);
         <div class="app-content">
             <slot />
         </div>
+        <NewAudioPlayer v-if="store.currentSong" />
         <div class="footer">
             <Link
                 :href="route(r.name)"
