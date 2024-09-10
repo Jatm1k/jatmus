@@ -58,11 +58,11 @@ class MainController extends Controller
             $processedFilename = "{$origName} (JatMusicBot {$request->effect} remix).{$origExtension}";
             $outputPath = "processed/{$processedFilename}";
 
-            $command = $this->songService->makeCommand($request->effect, $originalPath, $outputPath);
+            $command = $this->songService->makeCommand($request->effect, $request->effect_type, $originalPath, $outputPath);
             exec($command . ' 2>&1', $output, $return_var);
             $duration = $this->getAudioDuration(storage_path('app/public/' . $outputPath));
             if ($duration < 5) {
-                $command = $this->songService->makeCommand($request->effect, $originalPath, $outputPath, true);
+                $command = $this->songService->makeCommand($request->effect, $request->effect_type, $originalPath, $outputPath, true);
                 exec($command . ' 2>&1', $output, $return_var);
             }
             if ($return_var === 0) {

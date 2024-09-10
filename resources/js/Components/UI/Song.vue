@@ -17,7 +17,11 @@ const props = defineProps({
 });
 
 function handlePlay() {
-    store.currentSong = props.song;
+    if (store.currentSong?.id == props.song.id) {
+        store.isPlaying = !store.isPlaying;
+    } else {
+        store.currentSong = props.song;
+    }
 }
 
 const handleDownload = () => {

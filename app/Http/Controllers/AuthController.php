@@ -82,6 +82,6 @@ class AuthController extends Controller
 
     private function calculateRewardAmount(int $streak)
     {
-        return $streak > 5 ? 5 : $streak;
+        return $streak > 3 ? 3 : $streak;
     }
 }

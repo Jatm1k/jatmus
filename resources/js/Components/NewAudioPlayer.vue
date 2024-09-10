@@ -28,18 +28,18 @@ const sendAudio = () => {
 };
 
 const togglePlay = () => {
-    if (isPlaying.value) {
+    if (store.isPlaying) {
         audioPlayer.value.pause();
     } else {
         audioPlayer.value.play();
     }
-    isPlaying.value = !isPlaying.value;
+    store.isPlaying = !store.isPlaying;
 };
 
 const play = () => {
-    isPlaying.value = true;
+    store.isPlaying = true;
 
-    audioPlayer.value.pause();
+    // audioPlayer.value.pause();
     audioPlayer.value.load();
     audioPlayer.value.addEventListener(
         "canplay",
@@ -47,7 +47,6 @@ const play = () => {
             audioPlayer.value.play().catch((error) => {
                 console.error("Playback error:", error);
             });
-            isPlaying.value = true;
         },
         { once: true }
     );
@@ -81,6 +80,18 @@ watch(
         play();
     }
 );
+watch(
+    () => store.isPlaying,
+    (newValue, oldValue) => {
+        console.log(newValue, oldValue);
+
+        if (store.isPlaying) {
+            audioPlayer.value.play();
+        } else {
+            audioPlayer.value.pause();
+        }
+    }
+);
 </script>
 
 <template>
@@ -110,7 +121,7 @@ watch(
         </div>
         <div class="player__controls">
             <button @click="togglePlay" class="player__button">
-                <Icon :name="isPlaying ? 'pause' : 'play'" />
+                <Icon :name="store.isPlaying ? 'pause' : 'play'" />
             </button>
 
             <button

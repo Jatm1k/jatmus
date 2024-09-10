@@ -25,10 +25,17 @@ const effects = [
     { value: "bass", title: "Bass" },
 ];
 
+const effectTypes = [
+    { value: "low", title: "Слабый" },
+    { value: "medium", title: "Средний" },
+    { value: "hard", title: "Сильный" },
+];
+
 const form = ref({
     song: null,
     song_id: props?.song?.id,
     effect: "speed_up",
+    effect_type: "medium",
 });
 const processing = ref(false);
 const processedSong = ref(null);
@@ -41,6 +48,7 @@ function processAudio() {
         formData.append("song_id", form.value.song_id);
     }
     formData.append("effect", form.value.effect);
+    formData.append("effect_type", form.value.effect_type);
     processing.value = true;
     axios
         .post("/process", formData, {
@@ -126,6 +134,11 @@ function formatDate(date) {
                 Выбран файл: {{ song.original_filename }}
             </div>
             <Buttons :elems="effects" name="effect" v-model="form.effect" />
+            <Buttons
+                :elems="effectTypes"
+                name="effect_type"
+                v-model="form.effect_type"
+            />
             <div class="buttons-wrapper">
                 <button
                     type="submit"
