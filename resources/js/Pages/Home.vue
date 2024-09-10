@@ -35,7 +35,7 @@ const form = ref({
     song: null,
     song_id: props?.song?.id,
     effect: "speed_up",
-    effect_type: "medium",
+    effect_type: "low",
 });
 const processing = ref(false);
 const processedSong = ref(null);

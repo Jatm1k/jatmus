@@ -55,7 +55,7 @@ class MainController extends Controller
 
             $origName = pathinfo($originalFilename, PATHINFO_FILENAME);
             $origExtension = pathinfo($originalFilename, PATHINFO_EXTENSION);
-            $processedFilename = "{$origName} (JatMusicBot {$request->effect} remix).{$origExtension}";
+            $processedFilename = "{$origName} (JatMusicBot {$request->effect_type} {$request->effect} remix).{$origExtension}";
             $outputPath = "processed/{$processedFilename}";
 
             $command = $this->songService->makeCommand($request->effect, $request->effect_type, $originalPath, $outputPath);
@@ -76,6 +76,7 @@ class MainController extends Controller
                     'original_url' => Storage::url($originalPath),
                     'processed_url' => Storage::url($encodedPath),
                     'effect' => $request->effect,
+                    'effect_type' => $request->effect_type,
                 ]);
                 $song->load('user');
                 Cache::forget('feed');

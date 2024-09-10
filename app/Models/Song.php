@@ -17,7 +17,8 @@ class Song extends Model
         'original_path',
         'processed_url',
         'original_url',
-        'effect'
+        'effect',
+        'effect_type',
     ];
 
     protected $with = ['user'];
