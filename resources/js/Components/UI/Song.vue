@@ -68,6 +68,7 @@ const handleDownload = () => {
     padding: 6px 8px;
     background-color: var(--bg-color-200);
     border-radius: 8px;
+    width: 100%;
 }
 
 .song__info {
