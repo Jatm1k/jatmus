@@ -82,9 +82,7 @@ watch(
 );
 watch(
     () => store.isPlaying,
-    (newValue, oldValue) => {
-        console.log(newValue, oldValue);
-
+    () => {
         if (store.isPlaying) {
             audioPlayer.value.play();
         } else {

@@ -75,15 +75,15 @@ const handleDownload = () => {
     flex-direction: column;
     gap: 8px;
     flex: 1;
+    min-width: 0;
 }
 
 .song__filename {
     width: 100%;
     font-size: 12px;
     overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     color: var(--title-color);
 }
 
