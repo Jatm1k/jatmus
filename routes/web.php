@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MainController;
@@ -18,3 +19,5 @@ Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login')
 Route::post('/daily-reward', [AuthController::class, 'getDailyReward'])->name('daily-reward');
 
 Route::post('/send-audio', [MainController::class, 'sendAudio'])->name('send-audio');
+
+Route::get('/search', [SearchController::class, 'search'])->name('search');

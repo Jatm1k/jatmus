@@ -20,6 +20,7 @@ class User extends Authenticatable
         'is_premium',
         'premium_until',
         'next_ad_view',
+        'ad_check_count',
     ];
 
     public function songs(): HasMany

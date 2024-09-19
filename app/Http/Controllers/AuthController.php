@@ -12,7 +12,13 @@ class AuthController extends Controller
 {
     public function checkAuth()
     {
-        return response()->json(['auth' => Auth::check(), 'user' => Auth::user()]);
+        if (!Auth::check()) {
+            return response()->json(['auth' => false]);
+        } else {
+            $user = Auth::user();
+            $this->checkPremium($user);
+            return response()->json(['auth' => Auth::check(), 'user' => $user]);
+        }
     }
 
     public function login(Request $request)
@@ -38,6 +44,7 @@ class AuthController extends Controller
         }
 
         Auth::login($user);
+        $this->checkPremium($user);
         return response()->json(['user' => $user]);
     }
 
@@ -83,5 +90,14 @@ class AuthController extends Controller
     private function calculateRewardAmount(int $streak)
     {
         return $streak > 3 ? 3 : $streak;
+    }
+
+    private function checkPremium($user)
+    {
+        if ($user->premium_until && $user->premium_until < now()) {
+            $user->is_premium = false;
+            $user->premium_until = null;
+            $user->save();
+        }
     }
 }

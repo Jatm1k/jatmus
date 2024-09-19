@@ -43,5 +43,6 @@ const closePopup = () => {
     flex-direction: column;
     gap: 8px;
     align-items: center;
+    text-align: center;
 }
 </style>

@@ -20,6 +20,7 @@ function handlePlay() {
     if (store.currentSong?.id == props.song.id) {
         store.isPlaying = !store.isPlaying;
     } else {
+        store.isPlaying = true;
         store.currentSong = props.song;
     }
 }

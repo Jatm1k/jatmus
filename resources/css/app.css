@@ -27,8 +27,11 @@
 
     --title-color: #d4d4d4;
     --text-color: #a9a9a9;
+    --hint-color: #6b6b6b;
 
     --border-color: #4e4e4e;
+
+    --premium-color: #ffd700;
 }
 
 * {
@@ -79,4 +82,11 @@ a {
 .button:disabled {
     opacity: .5;
     cursor: not-allowed;
+}
+
+.premium {
+    background-color: var(--premium-color);
+    color: var(--bg-color-100);
+    padding: 0 2px;
+    border-radius: 4px;
 }

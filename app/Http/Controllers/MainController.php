@@ -134,18 +134,6 @@ class MainController extends Controller
 
     public function sendAudio(Request $request, Nutgram $bot)
     {
-        if (!$request->url) {
-            return response()->json([
-                'code' => 'send_error',
-                'message' => 'Ошибка отправки трека',
-            ], 400);
-        }
-        if (!Storage::disk('public')->exists($request->url)) {
-            return response()->json([
-                'code' => 'send_error',
-                'message' => 'Файл не найден',
-            ], 404);
-        }
         if (!auth()->check()) {
             return response()->json([
                 'code' => 'send_error',
@@ -155,7 +143,7 @@ class MainController extends Controller
         $link = env('TELEGRAM_BOT_LINK');
 
         $bot->sendAudio(
-            audio: InputFile::make(storage_path('app/public/' .$request->url)),
+            audio: InputFile::make($request->audio->getRealPath(), $request->filename),
             chat_id: auth()->user()->id,
             caption: "[Создать ремикс песни 🎧]({$link})",
             parse_mode: 'MarkdownV2'

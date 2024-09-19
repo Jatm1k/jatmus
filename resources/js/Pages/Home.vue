@@ -1,13 +1,14 @@
 <script setup>
-import { useForm } from "@inertiajs/vue3";
-import AudioPlayer from "../Components/AudioPlayer.vue";
-import Buttons from "../Components/UI/Buttons.vue";
 import BalanceIcon from "../Components/UI/BalanceIcon.vue";
 import Block from "../Components/UI/Block.vue";
-import TimerButton from "../Components/UI/TimerButton.vue";
+import { store } from "../store";
 import Popup from "../Components/UI/Popup.vue";
 import Song from "../Components/UI/Song.vue";
-import { inject, ref } from "vue";
+import Tabs from "../Components/UI/Tabs.vue";
+import Tab from "../Components/UI/Tab.vue";
+import RemixPro from "../Components/UI/RemixPro.vue";
+import Remix from "../Components/UI/Remix.vue";
+import { inject, ref, provide } from "vue";
 import axios from "axios";
 
 const user = inject("user");
@@ -16,20 +17,8 @@ const tg = window.Telegram.WebApp;
 
 const AdController = window.Adsgram.init({ blockId: "2780" });
 const showAdPopup = ref(false);
+
 const props = defineProps(["song"]);
-
-const effects = [
-    { value: "speed_up", title: "Speed up" },
-    { value: "slowed", title: "Slowed" },
-    { value: "8d", title: "8D" },
-    { value: "bass", title: "Bass" },
-];
-
-const effectTypes = [
-    { value: "low", title: "Слабый" },
-    { value: "medium", title: "Средний" },
-    { value: "hard", title: "Сильный" },
-];
 
 const form = ref({
     song: null,
@@ -68,7 +57,7 @@ function processAudio() {
 }
 
 function showAds() {
-    showAdPopup.value = !showAdPopup.value;
+    showAdPopup.value = false;
     AdController.show()
         .then((result) => {
             user.value.balance += 2;
@@ -102,6 +91,19 @@ function formatDate(date) {
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
+function uploadSong(event) {
+    const file = event.target.files[0];
+    form.value.song = file;
+    const audioURL = URL.createObjectURL(file);
+    store.currentSong = {
+        processed_url: audioURL,
+        processed_filename: file.name,
+        user: user, // Вы можете изменить это по необходимости
+    };
+}
+
+provide("showAds", showAds);
 </script>
 <template>
     <Popup :show="showAdPopup" @close="showAdPopup = false">
@@ -123,7 +125,7 @@ function formatDate(date) {
                 <input
                     type="file"
                     name="song"
-                    @input="form.song = $event.target.files[0]"
+                    @input="uploadSong($event)"
                     accept="audio/*"
                 />
             </label>
@@ -133,37 +135,22 @@ function formatDate(date) {
             <div v-else-if="song" class="selected-song">
                 Выбран файл: {{ song.original_filename }}
             </div>
-            <Buttons :elems="effects" name="effect" v-model="form.effect" />
-            <Buttons
-                :elems="effectTypes"
-                name="effect_type"
-                v-model="form.effect_type"
-            />
-            <div class="buttons-wrapper">
-                <button
-                    type="submit"
-                    class="button form-button"
-                    :class="{ 'button-loader': processing }"
-                    :disabled="
-                        processing || (!form.song && !song) || user.balance <= 0
-                    "
-                >
-                    <template v-if="user.balance > 0">
-                        Создать ремикс! - 1
-                        <BalanceIcon />
-                    </template>
-                    <template v-else
-                        >Недостаточно <BalanceIcon /> на балансе</template
-                    >
-                </button>
-                <TimerButton
-                    class="button ads-button"
-                    @click.prevent="showAdPopupHandler"
-                    :time="user.next_ad_view"
-                >
-                    +2 <BalanceIcon />
-                </TimerButton>
-            </div>
+            <Tabs>
+                <Tab label="Ремикс">
+                    <Remix
+                        :form="form"
+                        :song="song"
+                        :show-ad-popup-handler="showAdPopupHandler"
+                    />
+                </Tab>
+                <Tab label="JM Studio" :disabled="!user.is_premium">
+                    <RemixPro
+                        :form="form"
+                        :song="song"
+                        :show-ad-popup-handler="showAdPopupHandler"
+                    />
+                </Tab>
+            </Tabs>
         </form>
     </Block>
     <Block v-if="processedSong && !processing">
@@ -258,18 +245,5 @@ function formatDate(date) {
     100% {
         background-position: top left;
     }
-}
-
-.buttons-wrapper {
-    width: 100%;
-    display: flex;
-    gap: 8px;
-}
-
-.buttons-wrapper .form-button {
-    flex: 8;
-}
-.buttons-wrapper .ads-button {
-    flex: 2;
 }
 </style>
