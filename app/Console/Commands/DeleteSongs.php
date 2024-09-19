@@ -34,11 +34,11 @@ class DeleteSongs extends Command
         $songsToDelete = Song::where('created_at', '<', $oneWeekAgo)->get();
 
         foreach ($songsToDelete as $song) {
-            if (Storage::disk('public')->exists($song->processed_path)) {
+            if ($song->processed_path &&Storage::disk('public')->exists($song->processed_path)) {
                 Storage::disk('public')->delete($song->processed_path);
             }
 
-            if (Storage::disk('public')->exists($song->original_path)) {
+            if ($song->original_path && Storage::disk('public')->exists($song->original_path)) {
                 Storage::disk('public')->delete($song->original_path);
             }
 

@@ -49,7 +49,7 @@ const onChange = (value) => {
     border-radius: 8px;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     width: 100%;
     flex-wrap: wrap;
 }
@@ -58,8 +58,8 @@ const onChange = (value) => {
     cursor: pointer;
     text-align: center;
     border-radius: 4px;
-    padding: 4px 3px;
-    font-size: 12px;
+    padding: 4px 2px;
+    font-size: 11px;
 }
 .radio-button.active {
     transition: all 1s;
