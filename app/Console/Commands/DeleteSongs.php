@@ -34,15 +34,19 @@ class DeleteSongs extends Command
         $songsToDelete = Song::where('created_at', '<', $oneWeekAgo)->get();
 
         foreach ($songsToDelete as $song) {
-            if ($song->processed_path &&Storage::disk('public')->exists($song->processed_path)) {
-                Storage::disk('public')->delete($song->processed_path);
-            }
+            try {
+                if ($song->processed_path && Storage::disk('public')->exists($song->processed_path)) {
+                    Storage::disk('public')->delete($song->processed_path);
+                }
 
-            if ($song->original_path && Storage::disk('public')->exists($song->original_path)) {
-                Storage::disk('public')->delete($song->original_path);
-            }
+                if ($song->original_path && Storage::disk('public')->exists($song->original_path)) {
+                    Storage::disk('public')->delete($song->original_path);
+                }
 
-            $song->delete();
+                $song->delete();
+            } catch (\Exception $e) {
+                Log::error("Ошибка при удалении файла: " . $e->getMessage());
+            }
         }
         Log::info("Удалено {$songsToDelete->count()} треков");
         $this->info('Треки удалены');
