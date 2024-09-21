@@ -321,11 +321,22 @@ onMounted(() => {
     watch(
         () => store.currentSong,
         async () => {
+            // Останавливаем текущее воспроизведение
+            if (sourceNode.value) {
+                sourceNode.value.stop(0); // Немедленная остановка
+                sourceNode.value.disconnect(); // Отключаем старый источник
+            }
+
+            // Сбрасываем состояние времени
+            cancelAnimationFrame(animationFrameId.value);
+            resumeTime.value = 0;
+            currentTime.value = 0;
+
+            // Загружаем новое аудио
             if (store.currentSong && store.currentSong.processed_url) {
-                cancelAnimationFrame(animationFrameId.value);
-                resumeTime.value = 0;
-                currentTime.value = 0;
                 await loadAudio(store.currentSong.processed_url);
+
+                // Если включено воспроизведение, запускаем автоматически
                 if (store.isPlaying) {
                     play();
                 }
