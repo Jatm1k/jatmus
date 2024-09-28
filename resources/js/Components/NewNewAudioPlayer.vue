@@ -151,10 +151,94 @@ const sendAudio = async () => {
 
 const loadAudio = async (url) => {
     try {
-        const response = await axios.get(url, { responseType: "arraybuffer" });
-        const decodedData = await audioContext.decodeAudioData(response.data);
-        audioBuffer.value = decodedData;
-        duration.value = audioBuffer.value.duration;
+        audioBuffer.value = null;
+        const response = await fetch(url);
+        const reader = response.body.getReader();
+        const totalLength = +response.headers.get("Content-Length");
+        let receivedLength = 0; // Общее количество загруженных байтов
+        let audioData = new Uint8Array(0); // Данные аудио
+        let isPlayingFirstChunk = false; // Флаг для воспроизведения первой части
+        let isFullLoaded = false; // Флаг для полной загрузки
+        let currentPlaybackTime = 0; // Текущее время воспроизведения
+
+        const playChunk = async (chunk) => {
+            const combinedData = new Uint8Array(
+                audioData.length + chunk.length
+            );
+            combinedData.set(audioData);
+            combinedData.set(chunk, audioData.length);
+
+            audioData = combinedData; // Обновляем аудиоданные
+
+            // Декодируем только новый чанк
+            const decodedData = await audioContext.decodeAudioData(
+                chunk.buffer
+            );
+
+            if (!audioBuffer.value) {
+                // Если это первая часть данных, воспроизводим с начала
+                audioBuffer.value = decodedData;
+                // **Проверяем, включено ли воспроизведение**
+                if (store.isPlaying) {
+                    createSourceNode(0); // Воспроизводим с начала
+                    play(); // Воспроизведение
+                    isPlayingFirstChunk = true;
+                }
+            } else {
+                // Если это не первая часть, добавляем к текущему аудио
+                const newBuffer = audioContext.createBuffer(
+                    audioBuffer.value.numberOfChannels,
+                    audioBuffer.value.length + decodedData.length,
+                    audioBuffer.value.sampleRate
+                );
+
+                for (
+                    let channel = 0;
+                    channel < audioBuffer.value.numberOfChannels;
+                    channel++
+                ) {
+                    const oldData = audioBuffer.value.getChannelData(channel);
+                    const newData = decodedData.getChannelData(channel);
+                    const combined = new Float32Array(
+                        oldData.length + newData.length
+                    );
+
+                    combined.set(oldData);
+                    combined.set(newData, oldData.length);
+
+                    newBuffer.copyToChannel(combined, channel);
+                }
+
+                audioBuffer.value = newBuffer;
+            }
+
+            duration.value = audioBuffer.value.duration;
+        };
+
+        while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) {
+                isFullLoaded = true;
+                break; // Все данные загружены
+            }
+
+            receivedLength += value.length;
+
+            // Воспроизводим часть аудио
+            await playChunk(value);
+        }
+
+        if (isFullLoaded && isPlayingFirstChunk) {
+            // Когда загрузка завершена, сохраняем текущее время воспроизведения
+            resumeTime.value = audioContext.currentTime - startTime.value;
+
+            // Перезапускаем воспроизведение с текущего времени
+            if (store.isPlaying) {
+                createSourceNode(resumeTime.value); // Используем сохраненное время
+                // play();
+            }
+        }
     } catch (error) {
         console.error("Error loading audio:", error);
     }
@@ -191,7 +275,7 @@ const createSourceNode = (startTime) => {
     updateDetune();
 
     // Запускаем узел с новой позиции
-    sourceNode.value.start(0, startTime);
+    sourceNode.value.start(0, startTime); // используем startTime для начала воспроизведения с сохраненного времени
 };
 
 const updatePlaybackRate = () => {
@@ -262,14 +346,14 @@ const play = () => {
 
 const pause = () => {
     if (sourceNode.value) {
-        sourceNode.value.stop();
+        sourceNode.value.stop(); // Остановить воспроизведение
     }
 
-    resumeTime.value = audioContext.currentTime - startTime.value;
+    resumeTime.value = audioContext.currentTime - startTime.value; // Сохранить время на момент паузы
     isPlaying.value = false;
     store.isPlaying = false;
 
-    cancelAnimationFrame(animationFrameId.value);
+    cancelAnimationFrame(animationFrameId.value); // Остановка анимации прогресса
     cancelAnimationFrame(pannerAnimationId.value); // Остановка анимации панорамирования
 };
 
@@ -283,6 +367,8 @@ const togglePlay = () => {
 
 const animateProgress = () => {
     const updateTime = () => {
+        if (!isPlaying.value) return; // Останавливаем обновление, если воспроизведение на паузе
+
         currentTime.value = audioContext.currentTime - startTime.value;
 
         if (currentTime.value >= duration.value) {
@@ -335,11 +421,6 @@ onMounted(() => {
             // Загружаем новое аудио
             if (store.currentSong && store.currentSong.processed_url) {
                 await loadAudio(store.currentSong.processed_url);
-
-                // Если включено воспроизведение, запускаем автоматически
-                if (store.isPlaying) {
-                    play();
-                }
             }
         },
         { immediate: true }

@@ -8,7 +8,7 @@ import Tabs from "../Components/UI/Tabs.vue";
 import Tab from "../Components/UI/Tab.vue";
 import RemixPro from "../Components/UI/RemixPro.vue";
 import Remix from "../Components/UI/Remix.vue";
-import { inject, ref, provide } from "vue";
+import { inject, ref, provide, onMounted } from "vue";
 import axios from "axios";
 
 const user = inject("user");
@@ -99,9 +99,15 @@ function uploadSong(event) {
     store.currentSong = {
         processed_url: audioURL,
         processed_filename: file.name,
-        user: user, // Вы можете изменить это по необходимости
+        user: user,
     };
 }
+
+onMounted(() => {
+    if (props.song) {
+        store.currentSong = props.song;
+    }
+});
 
 provide("showAds", showAds);
 </script>
