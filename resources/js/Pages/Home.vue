@@ -105,7 +105,11 @@ function uploadSong(event) {
 
 onMounted(() => {
     if (props.song) {
-        store.currentSong = props.song;
+        store.currentSong = {
+            processed_url: props.song.original_url,
+            processed_filename: props.song.original_filename,
+            user: user,
+        };
     }
 });
 

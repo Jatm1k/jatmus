@@ -161,6 +161,9 @@ const loadAudio = async (url) => {
         let isFullLoaded = false; // Флаг для полной загрузки
         let currentPlaybackTime = 0; // Текущее время воспроизведения
 
+        let chunksLoaded = 0;
+        const requiredChunksBeforePlay = 5;
+
         const playChunk = async (chunk) => {
             const combinedData = new Uint8Array(
                 audioData.length + chunk.length
@@ -168,24 +171,17 @@ const loadAudio = async (url) => {
             combinedData.set(audioData);
             combinedData.set(chunk, audioData.length);
 
-            audioData = combinedData; // Обновляем аудиоданные
+            audioData = combinedData;
 
-            // Декодируем только новый чанк
+            // Декодируем данные
             const decodedData = await audioContext.decodeAudioData(
                 chunk.buffer
             );
 
             if (!audioBuffer.value) {
-                // Если это первая часть данных, воспроизводим с начала
                 audioBuffer.value = decodedData;
-                // **Проверяем, включено ли воспроизведение**
-                if (store.isPlaying) {
-                    createSourceNode(0); // Воспроизводим с начала
-                    play(); // Воспроизведение
-                    isPlayingFirstChunk = true;
-                }
             } else {
-                // Если это не первая часть, добавляем к текущему аудио
+                // Добавляем новый чанк в буфер
                 const newBuffer = audioContext.createBuffer(
                     audioBuffer.value.numberOfChannels,
                     audioBuffer.value.length + decodedData.length,
@@ -212,7 +208,18 @@ const loadAudio = async (url) => {
                 audioBuffer.value = newBuffer;
             }
 
+            if (
+                store.isPlaying &&
+                chunksLoaded >= requiredChunksBeforePlay &&
+                !isPlayingFirstChunk
+            ) {
+                createSourceNode(0);
+                play();
+                isPlayingFirstChunk = true;
+            }
+
             duration.value = audioBuffer.value.duration;
+            chunksLoaded++; // Увеличиваем счетчик чанков
         };
 
         while (true) {
