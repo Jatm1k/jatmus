@@ -149,10 +149,23 @@ const sendAudio = async () => {
     }
 };
 
+const abortController = ref(null); // Для хранения экземпляра AbortController
+
 const loadAudio = async (url) => {
     try {
+        // Прерываем предыдущую загрузку, если она существует
+        if (abortController.value) {
+            abortController.value.abort();
+        }
+
+        // Создаем новый AbortController для текущей загрузки
+        abortController.value = new AbortController();
+        const { signal } = abortController.value;
+
+        // Очищаем буфер перед загрузкой нового трека
         audioBuffer.value = null;
-        const response = await fetch(url);
+
+        const response = await fetch(url, { signal }); // Передаем сигнал для возможности отмены
         const reader = response.body.getReader();
         const totalLength = +response.headers.get("Content-Length");
         let receivedLength = 0; // Общее количество загруженных байтов
@@ -160,9 +173,10 @@ const loadAudio = async (url) => {
         let isPlayingFirstChunk = false; // Флаг для воспроизведения первой части
         let isFullLoaded = false; // Флаг для полной загрузки
         let currentPlaybackTime = 0; // Текущее время воспроизведения
-
+        const partSize = 0.125; // Загружаем по 1/8 трека
+        const partLength = Math.floor(totalLength * partSize); // Длина первой части
         let chunksLoaded = 0;
-        const requiredChunksBeforePlay = 5;
+        const requiredChunksBeforePlay = 1;
 
         const playChunk = async (chunk) => {
             const combinedData = new Uint8Array(
@@ -210,7 +224,7 @@ const loadAudio = async (url) => {
 
             if (
                 store.isPlaying &&
-                chunksLoaded >= requiredChunksBeforePlay &&
+                receivedLength <= partLength &&
                 !isPlayingFirstChunk
             ) {
                 createSourceNode(0);
@@ -247,7 +261,16 @@ const loadAudio = async (url) => {
             }
         }
     } catch (error) {
-        console.error("Error loading audio:", error);
+        if (error.name === "AbortError") {
+            console.log("Audio loading was aborted.");
+            // Очищаем буфер перед загрузкой нового трека
+            audioBuffer.value = null;
+            currentTime.value = 0; // Сброс текущего времени
+        } else {
+            console.error("Error loading audio:", error);
+        }
+    } finally {
+        abortController.value = null; // Сбрасываем контроллер после завершения загрузки
     }
 };
 
@@ -418,6 +441,7 @@ onMounted(() => {
             if (sourceNode.value) {
                 sourceNode.value.stop(0); // Немедленная остановка
                 sourceNode.value.disconnect(); // Отключаем старый источник
+                sourceNode.value = null;
             }
 
             // Сбрасываем состояние времени
