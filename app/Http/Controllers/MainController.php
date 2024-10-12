@@ -142,7 +142,11 @@ class MainController extends Controller
         }
 
         if ($request->url) {
-            $audio = InputFile::make(storage_path('app/public/' .$request->url));
+            $song = Song::where('processed_path', $request->url)->first();
+            $audio = InputFile::make(
+                storage_path('app/public/' .$request->url),
+                $song->processed_filename ?? $song->original_filename
+            );
         } elseif ($request->audio) {
             $audio = InputFile::make($request->audio->getRealPath(), $request->filename);
         }

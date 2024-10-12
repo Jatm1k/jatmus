@@ -73,7 +73,9 @@ const seek = (event) => {
 onMounted(() => {
     audioPlayer.value.addEventListener("timeupdate", onTimeUpdate);
     audioPlayer.value.addEventListener("loadedmetadata", onLoadedMetadata);
-    play();
+    if (store.isPlaying) {
+        play();
+    }
 });
 onUnmounted(() => {
     if (audioPlayer.value) {
