@@ -8,4 +8,12 @@ export const store = reactive({
     pitchShift: 0,
     bass: 0,
     stereoEffect: false,
+    hasEffects() {
+        return (
+            this.playbackRate !== 1 ||
+            this.pitchShift !== 0 ||
+            this.bass !== 0 ||
+            this.stereoEffect !== false
+        );
+    }
 })

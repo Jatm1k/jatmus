@@ -5,8 +5,9 @@ import MiniLogo from "./MiniLogo.vue";
 import Equalizer from "./Equalizer.vue";
 import { store } from "../../store";
 import axios from "axios";
+import Popup from "./Popup.vue";
 
-const isDownloadButtonLoad = ref(false);
+const isDownloadAudio = ref(false);
 const tg = window.Telegram.WebApp;
 
 const props = defineProps({
@@ -26,22 +27,27 @@ function handlePlay() {
 }
 
 const handleDownload = () => {
-    isDownloadButtonLoad.value = true;
+    isDownloadAudio.value = true;
     axios
         .post("/send-audio", { url: props.song.processed_path })
-        .then((response) => {
-            tg.showAlert(response.data.message);
-        })
         .catch((error) => {
             tg.showAlert(error.response.data.message);
         })
         .finally(() => {
-            isDownloadButtonLoad.value = false;
+            isDownloadAudio.value = false;
         });
 };
 </script>
 
 <template>
+    <Popup v-if="isDownloadAudio" :show="isDownloadAudio">
+        <h3>Отправляем аудио вам в личку, пожалуйста подождите</h3>
+        <img
+            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Smileys/Alien%20Monster.webp"
+            alt="Alien Monster"
+            class="emoji-image"
+        />
+    </Popup>
     <div class="song" @click="handlePlay">
         <div class="song__image">
             <Equalizer v-if="song.id == store.currentSong?.id" />
@@ -54,7 +60,7 @@ const handleDownload = () => {
         <button
             @click.stop="handleDownload"
             class="song__button"
-            :disabled="isDownloadButtonLoad"
+            :disabled="isDownloadAudio"
         >
             <Icon name="download" />
         </button>

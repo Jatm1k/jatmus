@@ -1,29 +1,27 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, onUnmounted } from "vue";
 import Icon from "./UI/Icon.vue";
 import axios from "axios";
 import { store } from "../store";
 import MiniLogo from "./UI/MiniLogo.vue";
+import Popup from "./UI/Popup.vue";
 
 const tg = window.Telegram.WebApp;
 const audioPlayer = ref(null);
 const isPlaying = ref(false);
 const duration = ref(0);
 const currentTime = ref(0);
-const isDownloadButtonLoad = ref(false);
+const isDownloadAudio = ref(false);
 
 const sendAudio = () => {
-    isDownloadButtonLoad.value = true;
+    isDownloadAudio.value = true;
     axios
         .post("/send-audio", { url: store.currentSong.processed_path })
-        .then((response) => {
-            tg.showAlert(response.data.message);
-        })
         .catch((error) => {
             tg.showAlert(error.response.data.message);
         })
         .finally(() => {
-            isDownloadButtonLoad.value = false;
+            isDownloadAudio.value = false;
         });
 };
 
@@ -53,11 +51,15 @@ const play = () => {
 };
 
 const onTimeUpdate = () => {
-    currentTime.value = audioPlayer.value.currentTime;
+    if (audioPlayer.value) {
+        currentTime.value = audioPlayer.value.currentTime;
+    }
 };
 
 const onLoadedMetadata = () => {
-    duration.value = audioPlayer.value.duration;
+    if (audioPlayer.value) {
+        duration.value = audioPlayer.value.duration;
+    }
 };
 
 const seek = (event) => {
@@ -72,6 +74,15 @@ onMounted(() => {
     audioPlayer.value.addEventListener("timeupdate", onTimeUpdate);
     audioPlayer.value.addEventListener("loadedmetadata", onLoadedMetadata);
     play();
+});
+onUnmounted(() => {
+    if (audioPlayer.value) {
+        audioPlayer.value.removeEventListener("timeupdate", onTimeUpdate);
+        audioPlayer.value.removeEventListener(
+            "loadedmetadata",
+            onLoadedMetadata
+        );
+    }
 });
 
 watch(
@@ -93,6 +104,14 @@ watch(
 </script>
 
 <template>
+    <Popup v-if="isDownloadAudio" :show="isDownloadAudio">
+        <h3>Отправляем аудио вам в личку, пожалуйста подождите</h3>
+        <img
+            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Smileys/Alien%20Monster.webp"
+            alt="Alien Monster"
+            class="emoji-image"
+        />
+    </Popup>
     <div class="progress-bar" @click="seek">
         <div
             class="progress-bar__fill"
@@ -125,7 +144,7 @@ watch(
             <button
                 @click="sendAudio"
                 class="player__button"
-                :disabled="isDownloadButtonLoad"
+                :disabled="isDownloadAudio"
             >
                 <Icon name="download" />
             </button>

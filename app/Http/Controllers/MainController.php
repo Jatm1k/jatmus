@@ -140,15 +140,20 @@ class MainController extends Controller
                 'message' => 'Ошибка авторизации',
             ], 403);
         }
+
+        if ($request->url) {
+            $audio = InputFile::make(storage_path('app/public/' .$request->url));
+        } elseif ($request->audio) {
+            $audio = InputFile::make($request->audio->getRealPath(), $request->filename);
+        }
         $link = env('TELEGRAM_BOT_LINK');
 
         $bot->sendAudio(
-            audio: InputFile::make($request->audio->getRealPath(), $request->filename),
+            audio: $audio,
             chat_id: auth()->user()->id,
             caption: "[Создать ремикс песни 🎧]({$link})",
             parse_mode: 'MarkdownV2'
         );
-
         return response()->json(['message' => 'Трек отправлен']);
     }
 }

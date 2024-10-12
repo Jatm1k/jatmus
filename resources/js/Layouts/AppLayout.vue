@@ -7,6 +7,7 @@ import DailyReward from "../Components/DailyReward.vue";
 import { provide, ref } from "vue";
 import axios from "axios";
 import NewNewAudioPlayer from "../Components/NewNewAudioPlayer.vue";
+import NewAudioPlayer from "../Components/NewAudioPlayer.vue";
 import { store } from "../store";
 
 const routes = [
@@ -75,7 +76,8 @@ provide("user", user);
         <div class="app-content">
             <slot />
         </div>
-        <NewNewAudioPlayer v-if="store.currentSong" />
+        <NewNewAudioPlayer v-if="store.currentSong && store.hasEffects()" />
+        <NewAudioPlayer v-if="store.currentSong && !store.hasEffects()" />
         <div class="footer">
             <Link
                 :href="route(r.name)"
