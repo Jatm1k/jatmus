@@ -24,6 +24,7 @@ $bot->onCommand('start', function (Nutgram $bot) {
             'id' => $bot->userId(),
             'name' => $bot->user()->first_name,
             'username' => $bot->user()->username,
+            'balance' => 3,
         ]);
     }
     $bot->sendMessage(

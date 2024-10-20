@@ -2,11 +2,11 @@
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { store } from "../../store";
 const bars = ref([
-    { height: 30 },
-    { height: 50 },
-    { height: 70 },
-    { height: 40 },
-    { height: 60 },
+    { height: 10 },
+    { height: 10 },
+    { height: 10 },
+    { height: 10 },
+    { height: 10 },
 ]);
 
 let intervalId;

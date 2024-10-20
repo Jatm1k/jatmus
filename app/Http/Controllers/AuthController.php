@@ -37,6 +37,7 @@ class AuthController extends Controller
             [
                 'name' => $request->first_name,
                 'username' => $request->username,
+                'balance' => 3,
             ]
         );
         if (!$user->id) {
