@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps, defineEmits } from "vue";
-
+import Icon from "./Icon.vue";
 const props = defineProps({
     show: Boolean,
 });
@@ -16,6 +16,9 @@ const closePopup = () => {
 <template>
     <div class="popup-bg" v-if="show" @click="closePopup">
         <div class="popup" @click.stop>
+            <button class="popup__close" @click="closePopup">
+                <Icon name="x" />
+            </button>
             <slot />
         </div>
     </div>
@@ -35,6 +38,7 @@ const closePopup = () => {
 }
 
 .popup {
+    position: relative; /* Новый стиль */
     flex: 1;
     padding: 16px;
     border-radius: 8px;
@@ -44,5 +48,18 @@ const closePopup = () => {
     gap: 8px;
     align-items: center;
     text-align: center;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.popup__close {
+    position: absolute; /* Новый стиль */
+    top: 8px; /* Отступ сверху */
+    right: 8px; /* Отступ справа */
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--bg-color-400);
 }
 </style>

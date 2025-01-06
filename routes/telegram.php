@@ -1,7 +1,9 @@
 <?php
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
+use App\Models\Transaction;
 use App\Models\User;
+use App\Telegram\Conversations\RefundConversation;
 use SergiX44\Nutgram\Nutgram;
 use App\Telegram\Commands\SongDownloadCommand;
 use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
@@ -37,3 +39,18 @@ $bot->onCommand('start', function (Nutgram $bot) {
 })->description('start command');
 
 $bot->onAudio([SongDownloadCommand::class, 'handle']);
+
+$bot->onPreCheckoutQuery(function (Nutgram $bot) {
+    $bot->answerPreCheckoutQuery(true);
+});
+
+$bot->onSuccessfulPayment(function (Nutgram $bot) {
+    $bot->sendMessage('Спасибо за покупку!');
+    Transaction::create([
+        'user_id' => $bot->userId(),
+        'amount' => $bot->message()->successful_payment->invoice_payload,
+        'transaction_id' => $bot->message()->successful_payment->telegram_payment_charge_id,
+    ]);
+});
+
+$bot->onCommand('refund', RefundConversation::class);

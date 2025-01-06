@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PayController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -21,3 +22,7 @@ Route::post('/daily-reward', [AuthController::class, 'getDailyReward'])->name('d
 Route::post('/send-audio', [MainController::class, 'sendAudio'])->name('send-audio');
 
 Route::get('/search', [SearchController::class, 'search'])->name('search');
+
+Route::post('/buy', [PayController::class,'buy'])->name('buy');
+Route::post('/add-balance', [PayController::class,'addBalance'])->name('add-balance');
+Route::post('/buy-premium', [PayController::class,'buyPremium'])->name('buy-premium');

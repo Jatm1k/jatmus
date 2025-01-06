@@ -48,7 +48,9 @@ function processAudio() {
         .then((response) => {
             processing.value = false;
             processedSong.value = response.data.song;
-            user.value.balance = --user.value.balance;
+            if (!user.value.is_premium) {
+                user.value.balance = --user.value.balance;
+            }
         })
         .catch((error) => {
             processing.value = false;

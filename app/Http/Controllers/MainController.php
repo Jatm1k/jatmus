@@ -81,7 +81,9 @@ class MainController extends Controller
                 $song->load('user');
                 Cache::forget('feed');
                 Cache::forget("profile_{$user->id}");
-                $user->decrement('balance');
+                if (!$user->is_premium) {
+                    $user->decrement('balance');
+                }
 
                 return response()->json(['song' => $song]);
             } else {

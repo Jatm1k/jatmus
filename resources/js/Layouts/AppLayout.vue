@@ -8,6 +8,8 @@ import axios from "axios";
 import NewNewAudioPlayer from "../Components/NewNewAudioPlayer.vue";
 import NewAudioPlayer from "../Components/NewAudioPlayer.vue";
 import { store } from "../store";
+import Popup from "../Components/UI/Popup.vue";
+import Store from "../Components/Store.vue";
 
 const routes = [
     { name: "profile", icon: "user" },
@@ -16,6 +18,7 @@ const routes = [
 ];
 
 const loadApp = ref(true);
+const showStore = ref(false);
 
 const tg = window.Telegram.WebApp;
 console.log(tg);
@@ -25,6 +28,11 @@ tg.expand();
 const tgUser = tg.initDataUnsafe.user;
 
 const user = ref(null);
+
+function openStore() {
+    showStore.value = true;
+}
+
 function auth() {
     axios
         .post("/auth/check")
@@ -63,13 +71,21 @@ provide("user", user);
         <div class="loader" v-else></div>
     </div>
     <div class="container" v-else>
+        <Popup :show="showStore" @close="showStore = false">
+            <Store />
+        </Popup>
         <div class="header">
             <a href="https://t.me/jatmusic">
                 <Logo />
             </a>
-            <span class="balance">
-                {{ user ? user.balance : 0 }} <BalanceIcon />
-            </span>
+            <div class="header-right">
+                <span class="balance">
+                    {{ user ? user.balance : 0 }} <BalanceIcon />
+                </span>
+                <a @click="openStore" class="store-button">
+                    <Icon name="store" :solid="true" />
+                </a>
+            </div>
         </div>
         <div class="app-content">
             <slot />
@@ -122,6 +138,13 @@ provide("user", user);
     width: clamp(3.125rem, 0.982rem + 22.86vw, 8.125rem);
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-right: 16px;
+}
+
 .balance {
     display: flex;
     align-items: center;
@@ -129,6 +152,14 @@ provide("user", user);
     padding: 4px 6px;
     border-radius: 8px;
     color: var(--title-color);
+}
+
+.store-button {
+    padding: 4px;
+    border-radius: 8px;
+    color: var(--title-color);
+    font-size: 16px;
+    cursor: pointer;
 }
 
 .footer {

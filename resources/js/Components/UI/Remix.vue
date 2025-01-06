@@ -53,7 +53,8 @@ const effectTypes = [
                 class="button form-button"
                 :disabled="(!form.song && !song) || user.balance <= 0"
             >
-                <template v-if="user.balance > 0">
+                <template v-if="user.is_premium">Создать ремикс!</template>
+                <template v-else-if="user.balance > 0">
                     Создать ремикс! - 1
                     <BalanceIcon />
                 </template>
