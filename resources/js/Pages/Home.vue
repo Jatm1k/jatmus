@@ -29,7 +29,7 @@ const form = ref({
 const processing = ref(false);
 const processedSong = ref(null);
 
-function processAudio() {
+async function processAudio() {
     const formData = new FormData();
     if (form.value.song) {
         formData.append("song", form.value.song);
@@ -39,6 +39,14 @@ function processAudio() {
     formData.append("effect", form.value.effect);
     formData.append("effect_type", form.value.effect_type);
     processing.value = true;
+    try {
+        if (!user.value.is_premium) {
+            await window.Adsgram.init({ blockId: "int-7170" }).show();
+        }
+    } catch (adError) {
+        console.warn("Не удалось показать рекламу:", adError);
+    }
+
     axios
         .post("/process", formData, {
             headers: {
