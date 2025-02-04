@@ -16,6 +16,10 @@ const user = inject("user");
 const tg = window.Telegram.WebApp;
 
 const AdController = window.Adsgram.init({ blockId: "2780" });
+
+AdController.addEventListener("onError", () => {
+    tg.showAlert("Произошла ошибка. Попробуйте ещё раз позже.");
+});
 const showAdPopup = ref(false);
 
 const props = defineProps(["song"]);
