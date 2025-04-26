@@ -15,7 +15,7 @@ const user = inject("user");
 
 const tg = window.Telegram.WebApp;
 
-const AdController = window.Adsgram.init({ blockId: "7788" });
+const AdController = window.Adsgram?.init({ blockId: "7788" });
 
 const showAdPopup = ref(false);
 
@@ -42,7 +42,7 @@ async function processAudio() {
     processing.value = true;
     try {
         if (!user.value.is_premium) {
-            await window.Adsgram.init({ blockId: "int-7790" }).show();
+            await window.Adsgram?.init({ blockId: "int-7790" })?.show();
         }
     } catch (adError) {
         console.warn("Не удалось показать рекламу:", adError);
@@ -69,7 +69,7 @@ async function processAudio() {
 
 function showAds() {
     showAdPopup.value = false;
-    AdController.show()
+    AdController?.show()
         .then((result) => {
             user.value.balance += 2;
             addFiveMinutes();
